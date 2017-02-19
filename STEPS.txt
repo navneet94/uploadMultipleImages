@@ -1,0 +1,47 @@
+STEPS TO UPLOAD MULTIPLE IMAGES
+1.CREATE NEW LARAVEL APPLICATION
+    -go to the directory where the laravel file is to be created
+    -create-project --prefer-dist laravel/laravel {name of the file}
+    -laravel artisan serve
+2.Go to welcome.blade.php
+    ->create form
+        ->action = upload {the route on which request is to be send}
+        ->id = upload {name of the id which will be accessed by javascript}
+        ->enctype = multipart/form-data {just a requirement}
+    ->create input
+        ->type=file {for uploading images}
+        ->name=file[] {name of the file which will be accessed using routes}
+        ->multiple {to access multiple files}
+    ->create div for message display
+        ->id = message
+    ->add javascript using script tag
+        ->form = document.getElementById('upload')
+        ->request=new XMLHttpRequest() {for enabling ajax request}
+        ->form.addEventListener('submit' , function(e)) {to capture the event e}
+        ->e.preventDefault() {because we don't want the request to submit to the route, we want to sumit it ourself}
+        -> formdata = new FormData(form) {create a new form data}
+        ->request.open('post', '/upload') {open a new request and send that request to /upload route}
+        ->request.addEventListener("load",transferComplete); {This line means that if the ajax request to the controller gets complete open function transferComplete}
+        ->request.send(formdata) {to send the form data to the mentioned route}
+        ->outside form.addEventListener declare the function transferComplete
+        ->function transferComplete(data)
+        ->response = JSON.parse(data.currentTarget.response);
+        ->if(response.success)
+        ->document.getElementById('message').innerHtml="successfully Uploaded"
+    ->add route data in routes.php file
+        Route::post(upload, UploadController@upload) {controllerName@FunctionOnController}
+    ->make a new controller via cmd
+        php artisan make:controller uploadController
+    ->Open Upload controller
+        ->make the upload function
+        ->add Request request as the parameter
+        ->print_r($request->all()) {print all the request we are getting on this controller}
+        ->$files = $request->file('file') {here 'file' is name of the input given above }
+        ->if(!empty($files)){check if files is not empty}
+        ->parse through each and every $file using foreach
+        ->and put the file in the storage location using Storage::put($file->getClientOriginalName(), file_get_contents($file));
+        ->add use Storage;
+        ->return JSON request
+        -> return \Response::json(array{'success'=>true));
+    
+3.ALL THE IMAGES ARE BY DEFAULT SAVED TO STORAGE->APP FOLDER
